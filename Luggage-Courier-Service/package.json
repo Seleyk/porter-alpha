@@ -15,5 +15,6 @@
   },
   "dependencies": {
     "stripe": "20.0.0"
-  }
+  },
+  "packageManager": "pnpm@10.33.2"
 }
