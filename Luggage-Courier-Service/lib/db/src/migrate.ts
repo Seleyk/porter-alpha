@@ -2,7 +2,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import path from "path";
 import { db, pool } from "./index";
 
-const migrationsFolder = path.join("/home/runner/workspace", "lib/db/migrations");
+const migrationsFolder = path.join(process.cwd(), "lib/db/migrations");
 
 const INITIAL_MIGRATION_HASH = "090adcf61fda68f65248d81c134469722899678b6098ed45449a52cabbf7561d";
 
