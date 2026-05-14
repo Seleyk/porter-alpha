@@ -207,11 +207,12 @@ async function resolveSessionUser(authHeader: string | undefined): Promise<{ use
 }
 
 router.post("/auth/send-otp", async (req: Request, res: Response): Promise<void> => {
-  const { target, type } = req.body ?? {};
+  let { target, type } = req.body ?? {};
   if (!target || !["phone", "email"].includes(type)) {
     res.status(400).json({ error: "target and type (phone|email) are required" });
     return;
   }
+  if (type === "email") target = target.toLowerCase();
 
   await db.delete(otpCodesTable).where(
     and(eq(otpCodesTable.target, target), lt(otpCodesTable.expiresAt, new Date()))
@@ -236,11 +237,12 @@ router.post("/auth/send-otp", async (req: Request, res: Response): Promise<void>
 });
 
 router.post("/auth/verify-otp", async (req: Request, res: Response): Promise<void> => {
-  const { target, code, role } = req.body ?? {};
+  let { target, code, role } = req.body ?? {};
   if (!target || !code || !["sender", "courier"].includes(role)) {
     res.status(400).json({ error: "target, code, and role are required" });
     return;
   }
+  if (typeof target === "string" && !target.startsWith("+")) target = target.toLowerCase();
 
   const [otpRecord] = await db
     .select()
