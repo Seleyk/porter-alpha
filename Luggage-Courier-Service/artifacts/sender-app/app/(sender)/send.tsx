@@ -1198,7 +1198,7 @@ export default function SenderPortsScreen() {
       <View style={[ss.screen, { backgroundColor: C.background }]}>
         <StepHeader
           title="Package photo"
-          subtitle="Step 3.5 of 4 — Required"
+          subtitle="Step 3.5 of 4 — Optional"
           onBack={() => setStep("port-details")}
         />
         <ScrollView
@@ -1288,7 +1288,7 @@ export default function SenderPortsScreen() {
           <View style={[ss.photoBenefitCard, { backgroundColor: C.primaryLight, borderColor: C.primary }]}>
             <Feather name="info" size={16} color={C.primary} />
             <Text style={[ss.photoBenefitText, { color: C.primary }]}>
-              A photo is required to proceed. It helps your porter confirm they have the right package.
+              Adding a photo helps your porter confirm they have the right package, but you can skip this step.
             </Text>
           </View>
         </ScrollView>
@@ -1300,7 +1300,7 @@ export default function SenderPortsScreen() {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               setStep("delivery-method");
             }}
-            disabled={!senderPhotoUrl || uploadingPhoto}
+            disabled={uploadingPhoto}
           />
         </View>
       </View>
