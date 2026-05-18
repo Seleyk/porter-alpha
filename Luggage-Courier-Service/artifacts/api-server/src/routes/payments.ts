@@ -368,9 +368,9 @@ router.post("/payments/checkout-session", async (req, res): Promise<void> => {
     const expectedPrice = calculatePrice(distanceKm, deliveryData.packageSize, deliveryData.deliveryType);
     const expectedCents = Math.round(expectedPrice * 100);
 
-    const baseUrl = process.env.APP_URL;
-    if (!baseUrl) {
-      res.status(500).json({ error: "APP_URL environment variable is required" });
+    const frontendUrl = process.env.FRONTEND_URL ?? process.env.APP_URL;
+    if (!frontendUrl) {
+      res.status(500).json({ error: "FRONTEND_URL environment variable is required" });
       return;
     }
 
@@ -383,7 +383,7 @@ router.post("/payments/checkout-session", async (req, res): Promise<void> => {
             currency: "usd",
             unit_amount: expectedCents,
             product_data: {
-              name: `SwiftSend — ${deliveryData.packageSize} package`,
+              name: `Porter — ${deliveryData.packageSize} package`,
               description: deliveryData.packageDescription,
             },
           },
@@ -391,8 +391,8 @@ router.post("/payments/checkout-session", async (req, res): Promise<void> => {
         },
       ],
       mode: "payment",
-      success_url: `${baseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/payment-success?cancelled=true`,
+      success_url: `${frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${frontendUrl}/payment-success?cancelled=true`,
       metadata: {
         userId,
         expectedCents: String(expectedCents),
