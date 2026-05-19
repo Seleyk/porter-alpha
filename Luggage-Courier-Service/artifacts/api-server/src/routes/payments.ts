@@ -391,8 +391,8 @@ router.post("/payments/checkout-session", async (req, res): Promise<void> => {
         },
       ],
       mode: "payment",
-      success_url: `${frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${frontendUrl}/payment-success?cancelled=true`,
+      ui_mode: "embedded",
+      return_url: `${frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       metadata: {
         userId,
         expectedCents: String(expectedCents),
@@ -411,7 +411,7 @@ router.post("/payments/checkout-session", async (req, res): Promise<void> => {
       },
     });
 
-    res.json({ url: session.url, sessionId: session.id, amountCents: expectedCents });
+    res.json({ clientSecret: session.client_secret, sessionId: session.id, amountCents: expectedCents, publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
   } catch (err: unknown) {
     res.status(500).json({ error: toMessage(err) });
   }

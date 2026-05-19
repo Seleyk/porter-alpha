@@ -7,11 +7,14 @@ import {
   Animated,
   Linking,
   Modal,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { EmbeddedCheckoutView } from "@/components/EmbeddedCheckoutView";
 
 const DOMAIN = process.env.EXPO_PUBLIC_DOMAIN;
 
@@ -96,6 +99,8 @@ export function PaymentBottomSheet({
     }
   }, [visible]);
 
+  const [checkoutData, setCheckoutData] = useState<{ clientSecret: string; publishableKey: string } | null>(null);
+
   const { token } = useUser();
 
   async function openCheckout() {
@@ -114,14 +119,43 @@ export function PaymentBottomSheet({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not start checkout");
-      await Linking.openURL(data.url);
-      onClose();
+      if (Platform.OS === "web" && data.clientSecret && data.publishableKey) {
+        setCheckoutData({ clientSecret: data.clientSecret, publishableKey: data.publishableKey });
+        setLoading(false);
+        setLoadingType(null);
+      } else {
+        await Linking.openURL(data.url);
+        onClose();
+      }
     } catch (e: any) {
       setError(e.message ?? "Payment failed. Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setLoading(false);
       setLoadingType(null);
     }
+  }
+
+  if (checkoutData) {
+    return (
+      <Modal transparent visible={true} animationType="slide" onRequestClose={() => setCheckoutData(null)}>
+        <View style={styles.embeddedOverlay}>
+          <View style={styles.embeddedHeader}>
+            <Pressable onPress={() => setCheckoutData(null)} style={styles.backBtn}>
+              <Feather name="arrow-left" size={20} color="#0E0F12" />
+              <Text style={styles.backBtnText}>Back</Text>
+            </Pressable>
+            <Text style={styles.embeddedTitle}>Secure Payment</Text>
+            <View style={{ width: 60 }} />
+          </View>
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+            <EmbeddedCheckoutView
+              clientSecret={checkoutData.clientSecret}
+              publishableKey={checkoutData.publishableKey}
+            />
+          </ScrollView>
+        </View>
+      </Modal>
+    );
   }
 
   if (!visible) return null;
@@ -290,5 +324,34 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Inter_400Regular",
     color: "#8A96A3",
+  },
+  embeddedOverlay: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  embeddedHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#DCE4EE",
+  },
+  embeddedTitle: {
+    fontSize: 16,
+    fontFamily: "Inter_600SemiBold",
+    color: "#0E0F12",
+  },
+  backBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    width: 60,
+  },
+  backBtnText: {
+    fontSize: 15,
+    fontFamily: "Inter_500Medium",
+    color: "#0E0F12",
   },
 });
